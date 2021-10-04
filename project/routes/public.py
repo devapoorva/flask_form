@@ -4,8 +4,13 @@ from wtforms import StringField,SubmitField
 from wtforms.validators import DataRequired,Length,Email,EqualTo
 import sys
 from project.forms.login import LoginForm
+from project.utils.functions import *
+
+# user_controller = UserController(Dao)
 
 public_routes = Blueprint('public_routes',__name__,template_folder="/templates")
+
+from project.controllers.UserController import UserController
 
 @public_routes.route('/',methods=['GET','POST'])
 def home():
@@ -17,15 +22,13 @@ def home():
 
 @public_routes.route('/register',methods=['POST'])
 def register():
+    from project import mysql
     login = LoginForm()
     if login.validate_on_submit():
         print(login.username.data, file=sys.stderr)
-        return ''' 
-        <h1>Form submitted successfully </h1>
-        <h3>Email {} </h3>
-        <h4>Password {} </h4>
-        <h4>Username {} </h4>
-          '''.format(login.email.data,login.password.data,login.username.data)
+        userController = UserController()
+        return userController.addUser(login.username.data,login.email.data,hash(login.password.data),"12345")
+        
     else:
         return render_template("index.html",form=login)
 
